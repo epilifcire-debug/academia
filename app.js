@@ -1,93 +1,173 @@
-let usuario = JSON.parse(localStorage.getItem("usuario")) || { nome:"", treinos:[] }
-let treinoAtual = null
-let exercicioAtual = null
+// ============================
+// ESTADO GLOBAL
+// ============================
+let usuario = JSON.parse(localStorage.getItem("usuario")) || {
+  nome: "",
+  treinos: []
+};
 
-const grupos = [
- "ombro","peitoral","bíceps","tríceps","abdômen","oblíquos",
- "antebraços","lombar","trapézio","dorsal","isquiotibiais",
- "quadríceps","panturrilha","abdutores","adutores","cardio"
-]
+let treinoAtual = null;
+let exercicioAtual = null;
 
-function salvarUsuario(){
-  usuario.nome = nomeUsuario.value
-  localStorage.setItem("usuario", JSON.stringify(usuario))
+// ============================
+// GRUPOS MUSCULARES
+// ============================
+const gruposMusculares = [
+  "ombro","peitoral","bíceps","tríceps","abdômen","oblíquos",
+  "antebraços","lombar","trapézio","dorsal","isquiotibiais",
+  "quadríceps","panturrilha","abdutores","adutores","cardio"
+];
+
+// ============================
+// USUÁRIO
+// ============================
+function salvarUsuario() {
+  usuario.nome = document.getElementById("nomeUsuario").value;
+  localStorage.setItem("usuario", JSON.stringify(usuario));
 }
 
-function abrirNovoTreino(){
-  modalTreino.style.display="flex"
+// ============================
+// TREINOS
+// ============================
+function abrirNovoTreino() {
+  document.getElementById("modalTreino").style.display = "flex";
 }
 
-function fecharModal(){
-  document.querySelectorAll(".modal").forEach(m=>m.style.display="none")
-}
+function salvarTreino() {
+  const nome = document.getElementById("nomeTreino").value;
+  const dias = [...document.querySelectorAll("#modalTreino input:checked")]
+    .map(i => i.value);
 
-function salvarTreino(){
-  const dias = [...document.querySelectorAll("#modalTreino input:checked")].map(i=>i.value)
+  if (!nome || dias.length === 0) return;
+
   usuario.treinos.push({
-    nome:nomeTreino.value,
+    nome,
     dias,
-    exercicios:[],
-    duracao:0
-  })
-  localStorage.setItem("usuario",JSON.stringify(usuario))
-  fecharModal()
-  listarTreinos()
+    exercicios: [],
+    duracao: 0
+  });
+
+  salvarStorage();
+  fecharModais();
+  listarTreinos();
 }
 
-function listarTreinos(){
-  listaTreinos.innerHTML=""
-  usuario.treinos.forEach((t,i)=>{
-    const div=document.createElement("div")
-    div.innerHTML=`<b>${t.nome}</b> ⏱ ${t.duracao} min`
-    div.onclick=()=>abrirGrupo(i)
-    listaTreinos.appendChild(div)
-  })
+function listarTreinos() {
+  const lista = document.getElementById("listaTreinos");
+  lista.innerHTML = "";
+
+  usuario.treinos.forEach((t, index) => {
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${t.nome}</strong><br>⏱ ${t.duracao} min`;
+    div.onclick = () => abrirGrupo(index);
+    lista.appendChild(div);
+  });
 }
 
-function abrirGrupo(i){
-  treinoAtual=i
-  modalGrupo.style.display="flex"
-  grupos.forEach(g=>{
-    const b=document.createElement("button")
-    b.textContent=g
-    b.onclick=()=>buscarGif(g)
-    gruposDiv.appendChild(b)
-  })
+// ============================
+// GRUPO MUSCULAR
+// ============================
+function abrirGrupo(index) {
+  treinoAtual = index;
+
+  const gruposDiv = document.getElementById("grupos");
+  gruposDiv.innerHTML = "";
+
+  document.getElementById("modalGrupo").style.display = "flex";
+
+  gruposMusculares.forEach(g => {
+    const btn = document.createElement("button");
+    btn.textContent = g;
+    btn.onclick = () => buscarGif(g);
+    gruposDiv.appendChild(btn);
+  });
 }
 
-async function buscarGif(grupo){
-  const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${grupo}+exercise&limit=5`)
-  const d=await r.json()
-  exercicioAtual={grupo, gif:d.data[0].images.fixed_height.url, series:[]}
-  gifSelecionado.src=exercicioAtual.gif
-  modalExercicio.style.display="flex"
+// ============================
+// BUSCA GIF
+// ============================
+async function buscarGif(grupo) {
+  fecharModais();
+
+  const res = await fetch(
+    `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${grupo}+exercise&limit=1`
+  );
+  const data = await res.json();
+
+  exercicioAtual = {
+    grupo,
+    gif: data.data[0]?.images.fixed_height.url || "",
+    series: [],
+    descanso: 0
+  };
+
+  document.getElementById("gifSelecionado").src = exercicioAtual.gif;
+  document.getElementById("series").innerHTML = "";
+  adicionarSerie();
+
+  document.getElementById("modalExercicio").style.display = "flex";
 }
 
-function adicionarSerie(){
-  if(exercicioAtual.series.length>=5) return
-  exercicioAtual.series.push({reps:12,kg:20})
-  renderSeries()
+// ============================
+// SÉRIES
+// ============================
+function adicionarSerie() {
+  if (exercicioAtual.series.length >= 5) return;
+
+  exercicioAtual.series.push({ reps: 12, kg: 20 });
+  renderSeries();
 }
 
-function renderSeries(){
-  series.innerHTML=""
-  exercicioAtual.series.forEach((s,i)=>{
-    series.innerHTML+=`
-      Série ${i+1}:
-      <input type="number" placeholder="Reps" value="${s.reps}">
-      <input type="number" placeholder="Kg" value="${s.kg}">
-    `
-  })
+function renderSeries() {
+  const div = document.getElementById("series");
+  div.innerHTML = "";
+
+  exercicioAtual.series.forEach((s, i) => {
+    div.innerHTML += `
+      <div>
+        Série ${i + 1}
+        <input type="number" value="${s.reps}" 
+          onchange="exercicioAtual.series[${i}].reps=this.value">
+        <input type="number" value="${s.kg}" 
+          onchange="exercicioAtual.series[${i}].kg=this.value">
+      </div>
+    `;
+  });
 }
 
-function salvarExercicio(){
-  const descanso = Number(descanso.value)
-  const duracao = exercicioAtual.series.length * 40 + (exercicioAtual.series.length-1)*descanso
-  usuario.treinos[treinoAtual].duracao += Math.ceil(duracao/60)
-  usuario.treinos[treinoAtual].exercicios.push(exercicioAtual)
-  localStorage.setItem("usuario",JSON.stringify(usuario))
-  fecharModal()
-  listarTreinos()
+// ============================
+// SALVAR EXERCÍCIO
+// ============================
+function salvarExercicio() {
+  exercicioAtual.descanso =
+    Number(document.getElementById("descanso").value) || 60;
+
+  const totalSeries = exercicioAtual.series.length;
+  const duracaoSeg =
+    totalSeries * 40 +
+    (totalSeries - 1) * exercicioAtual.descanso;
+
+  usuario.treinos[treinoAtual].duracao += Math.ceil(duracaoSeg / 60);
+  usuario.treinos[treinoAtual].exercicios.push(exercicioAtual);
+
+  salvarStorage();
+  fecharModais();
+  listarTreinos();
 }
 
-listarTreinos()
+// ============================
+// UTIL
+// ============================
+function fecharModais() {
+  document.querySelectorAll(".modal")
+    .forEach(m => m.style.display = "none");
+}
+
+function salvarStorage() {
+  localStorage.setItem("usuario", JSON.stringify(usuario));
+}
+
+// ============================
+// INIT
+// ============================
+listarTreinos();
