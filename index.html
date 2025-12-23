@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meu Treino</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<header class="top">
+  <h1>🏋️ Meu Treino</h1>
+</header>
+
+<main>
+
+  <!-- USUÁRIO -->
+  <section class="card">
+    <h2>👤 Usuário</h2>
+    <input id="nomeUsuario" placeholder="Seu nome"/>
+    <button onclick="salvarUsuario()">Salvar</button>
+  </section>
+
+  <!-- CALENDÁRIO -->
+  <section class="card">
+    <h2>📅 Calendário</h2>
+    <div id="calendario" class="dias"></div>
+  </section>
+
+  <!-- TREINOS -->
+  <section class="card">
+    <h2>🏋️ Meus Treinos</h2>
+    <button onclick="abrirNovoTreino()">➕ Novo Treino</button>
+    <div id="listaTreinos"></div>
+  </section>
+
+</main>
+
+<!-- MODAL NOVO TREINO -->
+<div class="modal" id="modalTreino">
+  <div class="modal-card">
+    <h3>Novo Treino</h3>
+    <input id="nomeTreino" placeholder="Nome do treino"/>
+
+    <div class="dias">
+      <label><input type="checkbox" value="Seg">Seg</label>
+      <label><input type="checkbox" value="Ter">Ter</label>
+      <label><input type="checkbox" value="Qua">Qua</label>
+      <label><input type="checkbox" value="Qui">Qui</label>
+      <label><input type="checkbox" value="Sex">Sex</label>
+      <label><input type="checkbox" value="Sab">Sab</label>
+      <label><input type="checkbox" value="Dom">Dom</label>
+    </div>
+
+    <div class="actions">
+      <button onclick="fecharModal()">Cancelar</button>
+      <button onclick="salvarTreino()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GRUPO MUSCULAR -->
+<div class="modal" id="modalGrupo">
+  <div class="modal-card">
+    <h3>Grupo Muscular</h3>
+    <div id="grupos"></div>
+    <button onclick="fecharModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL EXERCÍCIO -->
+<div class="modal" id="modalExercicio">
+  <div class="modal-card">
+    <h3>Exercício</h3>
+    <img id="gifSelecionado"/>
+    <div id="series"></div>
+
+    <input id="descanso" type="number" placeholder="Descanso (segundos)"/>
+
+    <button onclick="adicionarSerie()">➕ Série</button>
+    <button onclick="salvarExercicio()">Salvar Exercício</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html>
