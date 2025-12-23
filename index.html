@@ -10,26 +10,16 @@
 </head>
 <body>
 
-<header class="top">
-  🏋️ Meu Treino
-</header>
+<header class="top">🏋️ Meu Treino</header>
 
 <main>
 
-  <!-- USUÁRIO -->
   <section class="card">
     <h2>👤 Usuário</h2>
-    <input id="nomeUsuario" placeholder="Digite seu nome">
+    <input id="nomeUsuario" placeholder="Seu nome">
     <button onclick="salvarUsuario()">Salvar</button>
   </section>
 
-  <!-- CALENDÁRIO -->
-  <section class="card">
-    <h2>📅 Calendário</h2>
-    <div id="calendario" class="dias"></div>
-  </section>
-
-  <!-- TREINOS -->
   <section class="card">
     <h2>🏋️ Meus Treinos</h2>
     <button onclick="abrirNovoTreino()">➕ Novo Treino</button>
@@ -38,13 +28,11 @@
 
 </main>
 
-<!-- MODAL NOVO TREINO -->
+<!-- MODAIS -->
 <div class="modal" id="modalTreino">
   <div class="modal-card">
     <h3>Novo Treino</h3>
-
     <input id="nomeTreino" placeholder="Nome do treino">
-
     <div class="dias">
       <label><input type="checkbox" value="Seg">Seg</label>
       <label><input type="checkbox" value="Ter">Ter</label>
@@ -54,13 +42,11 @@
       <label><input type="checkbox" value="Sab">Sab</label>
       <label><input type="checkbox" value="Dom">Dom</label>
     </div>
-
     <button onclick="fecharModais()">Cancelar</button>
     <button onclick="salvarTreino()">Adicionar</button>
   </div>
 </div>
 
-<!-- MODAL GRUPO MUSCULAR -->
 <div class="modal" id="modalGrupo">
   <div class="modal-card">
     <h3>Grupo Muscular</h3>
@@ -69,24 +55,39 @@
   </div>
 </div>
 
-<!-- MODAL EXERCÍCIO -->
 <div class="modal" id="modalExercicio">
   <div class="modal-card">
     <h3>Novo Exercício</h3>
-
     <img id="gifSelecionado">
-
     <div id="series"></div>
-
-    <input id="descanso" type="number" placeholder="Descanso entre séries (segundos)">
-
-    <button onclick="adicionarSerie()">➕ Adicionar Série</button>
+    <input id="descanso" type="number" placeholder="Descanso (segundos)">
+    <button onclick="adicionarSerie()">➕ Série</button>
     <button onclick="salvarExercicio()">Salvar Exercício</button>
   </div>
 </div>
 
-<script src="app.js"></script>
+<!-- EXECUÇÃO -->
+<div class="modal" id="modalExecucao">
+  <div class="modal-card execucao">
+    <h3 id="execTreinoNome"></h3>
+    <div class="progresso-container">
+      <div id="barraProgresso"></div>
+    </div>
+    <img id="execGif">
+    <div class="exec-info">
+      <span id="execGrupo"></span>
+      <span id="execSerie"></span>
+    </div>
+    <div class="cronometro" id="cronometro">00:40</div>
+    <div class="exec-botoes">
+      <button onclick="pausarOuContinuar()">⏯️</button>
+      <button onclick="pularSerie()">⏭️</button>
+      <button onclick="finalizarTreino()">⛔</button>
+    </div>
+  </div>
+</div>
 
+<script src="app.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
