@@ -1,26 +1,18 @@
 let usuario=JSON.parse(localStorage.getItem("usuario"))||{nome:"",treinos:[]}
-let treinoAtual=null
-let exercicioAtual=null
+let treinoAtual=null, exercicioAtual=null
 
 const grupos=["ombro","peitoral","bíceps","tríceps","abdômen","oblíquos","antebraços","lombar","trapézio","dorsal","isquiotibiais","quadríceps","panturrilha","abdutores","adutores","cardio"]
 
-function salvarUsuario(){
-  usuario.nome=nomeUsuario.value
-  salvar()
-}
-
-function abrirNovoTreino(){
-  modalTreino.style.display="flex"
-}
+function salvar(){localStorage.setItem("usuario",JSON.stringify(usuario))}
+function salvarUsuario(){usuario.nome=nomeUsuario.value;salvar()}
+function abrirNovoTreino(){modalTreino.style.display="flex"}
 
 function salvarTreino(){
   const nome=nomeTreino.value
   const dias=[...modalTreino.querySelectorAll("input:checked")].map(i=>i.value)
   if(!nome||!dias.length)return
   usuario.treinos.push({nome,dias,exercicios:[],duracao:0})
-  salvar()
-  fecharModais()
-  listarTreinos()
+  salvar();fecharModais();listarTreinos()
 }
 
 function listarTreinos(){
@@ -74,47 +66,51 @@ function renderSeries(){
 
 function salvarExercicio(){
   exercicioAtual.descanso=+descanso.value||60
-  const duracao=(exercicioAtual.series.length*40+(exercicioAtual.series.length-1)*exercicioAtual.descanso)
-  usuario.treinos[treinoAtual].duracao+=Math.ceil(duracao/60)
+  const dur=(exercicioAtual.series.length*40+(exercicioAtual.series.length-1)*exercicioAtual.descanso)
+  usuario.treinos[treinoAtual].duracao+=Math.ceil(dur/60)
   usuario.treinos[treinoAtual].exercicios.push(exercicioAtual)
-  salvar()
-  fecharModais()
-  listarTreinos()
+  salvar();fecharModais();listarTreinos()
 }
 
-function fecharModais(){
-  document.querySelectorAll(".modal").forEach(m=>m.style.display="none")
-}
+function fecharModais(){document.querySelectorAll(".modal").forEach(m=>m.style.display="none")}
 
-function salvar(){
-  localStorage.setItem("usuario",JSON.stringify(usuario))
+/* ===== SONS ===== */
+function som(freq,dur){
+  try{
+    const c=new AudioContext(),o=c.createOscillator(),g=c.createGain()
+    o.frequency.value=freq;o.connect(g);g.connect(c.destination)
+    o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur/1000)
+    o.stop(c.currentTime+dur/1000)
+  }catch{}
 }
+function alertaSerie(){navigator.vibrate?.([150]);som(1000,150)}
+function alertaDescanso(){navigator.vibrate?.([100,100,100]);som(700,200);setTimeout(()=>som(700,200),220)}
+function alertaFinal(){navigator.vibrate?.([300,200,300,200,500]);som(400,500)}
 
 /* ===== EXECUÇÃO ===== */
 let exec={}
 
 function iniciarExecucaoTreino(i){
-  exec={treino:i,ex:0,serie:0,tempo:40,rodando:true}
+  exec={t:i,e:0,s:0,tempo:40,rodando:true}
   carregarExecucao()
   modalExecucao.style.display="flex"
   iniciarTimer()
 }
 
 function carregarExecucao(){
-  const t=usuario.treinos[exec.treino]
-  const e=t.exercicios[exec.ex]
+  const t=usuario.treinos[exec.t],e=t.exercicios[exec.e]
   execGif.src=e.gif
   execTreinoNome.textContent=t.nome
   execGrupo.textContent=e.grupo
-  execSerie.textContent=`Série ${exec.serie+1}/${e.series.length}`
+  execSerie.textContent=`Série ${exec.s+1}/${e.series.length}`
   atualizarProgresso()
 }
 
 function iniciarTimer(){
   exec.timer=setInterval(()=>{
     exec.tempo--
-    atualizarCronometro()
-    if(exec.tempo<=0)avancar()
+    cronometro.textContent=`00:${String(exec.tempo).padStart(2,"0")}`
+    if(exec.tempo<=0){alertaSerie();avancar()}
   },1000)
 }
 
@@ -125,32 +121,28 @@ function pausarOuContinuar(){
 
 function avancar(){
   clearInterval(exec.timer)
+  alertaDescanso()
   exec.tempo=40
-  const t=usuario.treinos[exec.treino]
-  const e=t.exercicios[exec.ex]
-  if(exec.serie<e.series.length-1)exec.serie++
-  else if(exec.ex<t.exercicios.length-1){exec.ex++;exec.serie=0}
+  const t=usuario.treinos[exec.t],e=t.exercicios[exec.e]
+  if(exec.s<e.series.length-1)exec.s++
+  else if(exec.e<t.exercicios.length-1){exec.e++;exec.s=0}
   else return finalizarTreino()
-  carregarExecucao()
-  iniciarTimer()
+  carregarExecucao();iniciarTimer()
 }
 
 function pularSerie(){avancar()}
 
-function atualizarCronometro(){
-  cronometro.textContent=`00:${String(exec.tempo).padStart(2,"0")}`
-}
-
 function atualizarProgresso(){
-  const t=usuario.treinos[exec.treino]
+  const t=usuario.treinos[exec.t]
   let total=0,atual=0
-  t.exercicios.forEach((e,i)=>{total+=e.series.length;if(i<exec.ex)atual+=e.series.length})
-  atual+=exec.serie+1
+  t.exercicios.forEach((e,i)=>{total+=e.series.length;if(i<exec.e)atual+=e.series.length})
+  atual+=exec.s+1
   barraProgresso.style.width=Math.min((atual/total)*100,100)+"%"
 }
 
 function finalizarTreino(){
   clearInterval(exec.timer)
+  alertaFinal()
   modalExecucao.style.display="none"
   alert("Treino finalizado 💪🔥")
 }
