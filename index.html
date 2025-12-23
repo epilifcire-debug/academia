@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Meu Treino</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +12,6 @@
 <header class="top">🏋️ Meu Treino</header>
 
 <main>
-
   <section class="card">
     <h2>👤 Usuário</h2>
     <input id="nomeUsuario" placeholder="Seu nome">
@@ -24,8 +22,8 @@
     <h2>🏋️ Meus Treinos</h2>
     <button onclick="abrirNovoTreino()">➕ Novo Treino</button>
     <div id="listaTreinos"></div>
+    <small>👉 Toque para editar • Duplo toque para executar</small>
   </section>
-
 </main>
 
 <!-- MODAIS -->
@@ -70,15 +68,20 @@
 <div class="modal" id="modalExecucao">
   <div class="modal-card execucao">
     <h3 id="execTreinoNome"></h3>
+
     <div class="progresso-container">
       <div id="barraProgresso"></div>
     </div>
+
     <img id="execGif">
+
     <div class="exec-info">
       <span id="execGrupo"></span>
       <span id="execSerie"></span>
     </div>
+
     <div class="cronometro" id="cronometro">00:40</div>
+
     <div class="exec-botoes">
       <button onclick="pausarOuContinuar()">⏯️</button>
       <button onclick="pularSerie()">⏭️</button>
